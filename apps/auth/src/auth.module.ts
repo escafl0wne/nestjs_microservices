@@ -10,6 +10,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { UsersRepository } from './users/users.repository';
 import { UsersService } from './users/users.service';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { UsersService } from './users/users.service';
     
   
     JwtModule.registerAsync({
+     
       useFactory: (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
         signOptions: {
@@ -40,6 +42,7 @@ import { UsersService } from './users/users.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService,LocalStrategy,UsersService],
+  providers: [AuthService,LocalStrategy,JwtStrategy,UsersService],
+  
 })
 export class AuthModule {}

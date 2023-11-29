@@ -7,6 +7,8 @@ import { UsersRepository } from './users.repository';
 import { UsersService } from './users.service';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
+import { JwtStrategy } from '../strategies/jwt.strategy';
+
 
 @Module({
   imports: [
@@ -23,10 +25,10 @@ import * as Joi from 'joi';
       envFilePath:'./apps/auth/.env'
      
     }),
-    LoggerModule
+    LoggerModule,
   ],
   controllers: [UsersController],
-  providers: [UsersService,UsersRepository],
+  providers: [UsersService,UsersRepository,JwtStrategy],
   exports:[UsersService,UsersRepository]
 })
 export class UsersModule {}

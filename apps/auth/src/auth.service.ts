@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from './users/dto/login-user.dto';
 import { UsersRepository } from './users/users.repository';
 import { UsersService } from './users/users.service';
+import { TTokenPayload } from '@app/common/lib/types/token-payload.type';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
   ) {}
-  private async signToken(payload: Object, response: Response) {
+  private async signToken(payload: TTokenPayload, response: Response) {
     const expires = new Date();
     expires.setSeconds(
       expires.getSeconds() + this.configService.get('JWT_EXPIRES'),
@@ -35,16 +36,18 @@ export class AuthService {
     };
     this.signToken(tokenPayload, response);
   }
-  async validateToken(header: string, response: Response) {
+  async validateToken(header: string, response: Response,existingUser:UserDocument){
     const token = header.split('=')[1];
-    const payload = await this.jwtService.verify(token);
+    const payload = this.jwtService.decode(token);
+    
+    if(!payload || !payload["userId"] || payload['userId'] !== existingUser._id.toHexString()) return false
+       
+    this.signToken({userId:payload["userId"]},response)
+    return true
+    
+    
 
-    if (!payload) throw new UnauthorizedException('Invalid token');
-    const { exp, userId } = payload;
-
-    // issue a new token
-    if (exp < Date.now() / 1000) this.signToken({ userId }, response);
-
-    return true;
+   
   }
+
 }
